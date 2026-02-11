@@ -1,4 +1,5 @@
 import 'package:blabla/service/locations_service.dart';
+import 'package:blabla/utils/animations_util.dart';
 import 'package:flutter/material.dart';
 import 'package:blabla/model/ride/locations.dart';
 import 'package:blabla/model/ride_pref/ride_pref.dart';
@@ -11,7 +12,7 @@ import 'package:blabla/widgets/display/bla_divider.dart';
 import 'package:blabla/theme/theme.dart';
 
 class RideForm extends StatefulWidget {
-  const RideForm({super.key,this.initRidePref});
+  const RideForm({super.key, this.initRidePref});
 
   final RidePref? initRidePref;
 
@@ -66,8 +67,14 @@ class _RideFormState extends State<RideForm> {
   Future<void> _selectDeparture() async {
     final Location? result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => LocationSearchScreen(
+      // MaterialPageRoute(
+      //   builder: (_) => LocationSearchScreen(
+      //     allLocations: LocationsService.availableLocations,
+      //     history: searchHistory,
+      //   ),
+      // ),
+       AnimationUtils.createBottomToTopRoute(
+        LocationSearchScreen(
           allLocations: LocationsService.availableLocations,
           history: searchHistory,
         ),
@@ -85,9 +92,14 @@ class _RideFormState extends State<RideForm> {
   Future<void> _selectArrival() async {
     final Location? result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => LocationSearchScreen(
-          allLocations:  LocationsService.availableLocations,
+      // MaterialPageRoute(
+      //   builder: (_) => LocationSearchScreen(
+      //     allLocations:  LocationsService.availableLocations,
+      //     history: searchHistory,
+      //   ),
+      AnimationUtils.createBottomToTopRoute(
+        LocationSearchScreen(
+          allLocations: LocationsService.availableLocations,
           history: searchHistory,
         ),
       ),
@@ -164,13 +176,9 @@ class _RideFormState extends State<RideForm> {
               onTap: _selectArrival,
             ),
             BlaDivider(),
-            DatePickerField(
-              date: departureDate,
-            ),
+            DatePickerField(date: departureDate),
             BlaDivider(),
-            PassagerCount(
-              requestedSeat: requestedSeats,
-            ),
+            PassagerCount(requestedSeat: requestedSeats),
             SizedBox(
               width: double.infinity,
               child: BlaButton(
