@@ -1,4 +1,3 @@
-import 'package:blabla/service/locations_service.dart';
 import 'package:blabla/widgets/inputs/ride_form.dart';
 import 'package:flutter/material.dart';
 
@@ -63,7 +62,6 @@ class _RidePrefScreenState extends State<RidePrefScreen> {
           SizedBox(height: 100),
           RideForm(
             initRidePref: RidePrefService.currentRidePref,
-            allLocations: LocationsService.availableLocations, 
           ),
           SizedBox(height: BlaSpacings.m),
 

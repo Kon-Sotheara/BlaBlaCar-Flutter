@@ -1,3 +1,4 @@
+import 'package:blabla/service/locations_service.dart';
 import 'package:flutter/material.dart';
 import 'package:blabla/model/ride/locations.dart';
 import 'package:blabla/model/ride_pref/ride_pref.dart';
@@ -10,10 +11,9 @@ import 'package:blabla/widgets/display/bla_divider.dart';
 import 'package:blabla/theme/theme.dart';
 
 class RideForm extends StatefulWidget {
-  const RideForm({super.key, required this.allLocations, this.initRidePref});
+  const RideForm({super.key,this.initRidePref});
 
   final RidePref? initRidePref;
-  final List<Location> allLocations;
 
   @override
   State<RideForm> createState() => _RideFormState();
@@ -68,7 +68,7 @@ class _RideFormState extends State<RideForm> {
       context,
       MaterialPageRoute(
         builder: (_) => LocationSearchScreen(
-          allLocations: widget.allLocations,
+          allLocations: LocationsService.availableLocations,
           history: searchHistory,
         ),
       ),
@@ -87,7 +87,7 @@ class _RideFormState extends State<RideForm> {
       context,
       MaterialPageRoute(
         builder: (_) => LocationSearchScreen(
-          allLocations: widget.allLocations,
+          allLocations:  LocationsService.availableLocations,
           history: searchHistory,
         ),
       ),

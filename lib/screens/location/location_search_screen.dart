@@ -1,3 +1,4 @@
+import 'package:blabla/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:blabla/model/ride/locations.dart';
 import 'package:blabla/screens/location/widgets/location_tile.dart';
@@ -18,26 +19,61 @@ class LocationSearchScreen extends StatefulWidget {
 
 class _LocationSearchScreenState extends State<LocationSearchScreen> {
   String query = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    _searchController.dispose();
+  }
+
+  void clear() {
+    _searchController.clear();
+    setState(() {
+      query = '';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // Filter locations by search query
-    final filtered = widget.allLocations
-        .where((loc) => loc.name.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final filtered = query.isNotEmpty
+        ? widget.allLocations
+              .where(
+                (loc) => loc.name.toLowerCase().contains(query.toLowerCase()),
+              )
+              .toList()
+        : [];
 
     // Filter history by search query
-    final filteredHistory = widget.history
-        .where((loc) => loc.name.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final filteredHistory = query.isNotEmpty
+        ? widget.history
+              .where(
+                (loc) => loc.name.toLowerCase().contains(query.toLowerCase()),
+              )
+              .toList()
+        : [];
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios,
+            size: 18,
+            color: BlaColors.neutralLight,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: TextField(
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Search location',
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: 'Station Road or The Bridge Cafe',
+            hintStyle: TextStyle(color: BlaColors.textNormal),
             border: InputBorder.none,
+            suffixIcon: query.isNotEmpty
+                ? IconButton(icon: const Icon(Icons.clear), onPressed: clear)
+                : null,
           ),
           onChanged: (val) => setState(() => query = val),
         ),
