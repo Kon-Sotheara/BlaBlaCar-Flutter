@@ -1,3 +1,4 @@
+import 'package:blabla/screens/RequestedSeat/requested_seat.dart';
 import 'package:blabla/screens/ride/ride_screen.dart';
 import 'package:blabla/service/locations_service.dart';
 import 'package:blabla/utils/animations_util.dart';
@@ -74,7 +75,7 @@ class _RideFormState extends State<RideForm> {
       //     history: searchHistory,
       //   ),
       // ),
-       AnimationUtils.createBottomToTopRoute(
+      AnimationUtils.createBottomToTopRoute(
         LocationSearchScreen(
           allLocations: LocationsService.availableLocations,
           history: searchHistory,
@@ -114,6 +115,19 @@ class _RideFormState extends State<RideForm> {
     }
   }
 
+  Future<void> _selectRequestedSeat() async {
+    final result = await Navigator.push(
+      context,
+      AnimationUtils.createBottomToTopRoute(
+        RequestedSeat(requestedSeat: requestedSeats),
+      ),
+    );
+
+    setState(() {
+      requestedSeats = result;
+    });
+  }
+
   void _onSearch() async {
     // If departure is empty, open departure picker
     if (departure == null) {
@@ -142,10 +156,9 @@ class _RideFormState extends State<RideForm> {
     // Navigate to RideScreen (replace with your actual screen)
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => RideScreen(ridePref: ridePref,)),
+      MaterialPageRoute(builder: (_) => RideScreen(ridePref: ridePref)),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +197,10 @@ class _RideFormState extends State<RideForm> {
             BlaDivider(),
             DatePickerField(date: departureDate),
             BlaDivider(),
-            PassagerCount(requestedSeat: requestedSeats),
+            PassagerCount(
+              requestedSeat: requestedSeats,
+              onTap: _selectRequestedSeat,
+            ),
             SizedBox(
               width: double.infinity,
               child: BlaButton(
