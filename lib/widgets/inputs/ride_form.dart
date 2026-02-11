@@ -1,44 +1,48 @@
+import 'package:flutter/material.dart';
 import 'package:blabla/model/ride/locations.dart';
-import 'package:blabla/theme/theme.dart';
+import 'package:blabla/model/ride_pref/ride_pref.dart';
+import 'package:blabla/screens/location/location_search_screen.dart';
+import 'package:blabla/widgets/inputs/location_picker_field.dart';
+import 'package:blabla/widgets/inputs/date_picker_field.dart';
+import 'package:blabla/widgets/inputs/passager_count.dart';
 import 'package:blabla/widgets/actions/bla_buton.dart';
 import 'package:blabla/widgets/display/bla_divider.dart';
-import 'package:blabla/widgets/inputs/date_picker_field.dart';
-import 'package:blabla/widgets/inputs/location_picker_field.dart';
-import 'package:blabla/widgets/inputs/passager_count.dart';
-import 'package:flutter/material.dart';
+import 'package:blabla/theme/theme.dart';
 
 class RideForm extends StatefulWidget {
-  RideForm({
-    super.key,
-    this.departure,
-    this.arrival,
-    DateTime? date,
-    int? requestedSeat,
-  }) : date = date ?? DateTime.now(),
-       requestedSeat = requestedSeat ?? 1;
+  const RideForm({super.key, required this.allLocations, this.initRidePref});
 
-  final Location? departure;
-  final Location? arrival;
-  final DateTime date;
-  final int requestedSeat;
+  final RidePref? initRidePref;
+  final List<Location> allLocations;
 
   @override
   State<RideForm> createState() => _RideFormState();
 }
 
 class _RideFormState extends State<RideForm> {
-  late Location? departure;
-  late Location? arrival;
+  Location? departure;
+  Location? arrival;
   late DateTime departureDate;
   late int requestedSeats;
+
+  List<Location> searchHistory = [];
 
   @override
   void initState() {
     super.initState();
-    departure = widget.departure;
-    arrival = widget.arrival;
-    departureDate = widget.date;
-    requestedSeats = widget.requestedSeat;
+    if (widget.initRidePref != null) {
+      departure = widget.initRidePref?.departure;
+      arrival = widget.initRidePref?.arrival;
+      departureDate = widget.initRidePref!.departureDate;
+      requestedSeats = widget.initRidePref!.requestedSeats;
+
+      // Add initial locations to history
+      if (departure != null) searchHistory.add(departure!);
+      if (arrival != null) searchHistory.add(arrival!);
+    } else {
+      departureDate = DateTime.now();
+      requestedSeats = 1;
+    }
   }
 
   void switchLocation() {
@@ -49,18 +53,81 @@ class _RideFormState extends State<RideForm> {
     });
   }
 
-  // testing switch location
-  // void fakeSelectDeparture() {
-  //   setState(() {
-  //     departure = Location(name: "Paris", country: Country.france); // fake location
-  //   });
-  // }
+  void _addToHistory(Location loc) {
+    searchHistory.removeWhere(
+      (h) =>
+          h.name.toLowerCase() == loc.name.toLowerCase() &&
+          h.country.name.toLowerCase() == loc.country.name.toLowerCase(),
+    );
+    searchHistory.insert(0, loc);
+    if (searchHistory.length > 10) searchHistory.removeLast();
+  }
 
-  // void fakeSelectArrival() {
-  //   setState(() {
-  //     arrival = Location(name: "Lyon", country: Country.france); // fake location
-  //   });
-  // }
+  Future<void> _selectDeparture() async {
+    final Location? result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LocationSearchScreen(
+          allLocations: widget.allLocations,
+          history: searchHistory,
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        departure = result;
+        _addToHistory(result);
+      });
+    }
+  }
+
+  Future<void> _selectArrival() async {
+    final Location? result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LocationSearchScreen(
+          allLocations: widget.allLocations,
+          history: searchHistory,
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        arrival = result;
+        _addToHistory(result);
+      });
+    }
+  }
+
+  void _onSearch() {
+    if (departure == null ||
+        arrival == null ||
+        requestedSeats <= 0 ||
+        departureDate.isBefore(
+          DateTime.now().subtract(const Duration(days: 1)),
+        )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields correctly')),
+      );
+      return;
+    }
+
+    // final ridePref = RidePref(
+    //   departure: departure!,
+    //   arrival: arrival!,
+    //   departureDate: departureDate,
+    //   requestedSeats: requestedSeats,
+    // );
+
+    // // Add both locations to history
+    // _addToHistory(departure!);
+    // _addToHistory(arrival!);
+
+    // // Return RidePref to parent
+    // Navigator.pop(context, ridePref);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,9 +145,9 @@ class _RideFormState extends State<RideForm> {
               children: [
                 Expanded(
                   child: LocationPickerField(
-                    label: 'location from',
+                    label: 'Location from',
                     seletedLocation: departure,
-                    onTap: () {},
+                    onTap: _selectDeparture,
                   ),
                 ),
                 if (departure != null)
@@ -94,21 +161,23 @@ class _RideFormState extends State<RideForm> {
             LocationPickerField(
               label: 'Going to',
               seletedLocation: arrival,
-              onTap: () {},
+              onTap: _selectArrival,
             ),
             BlaDivider(),
-            DatePickerField(date: DateTime.now()),
+            DatePickerField(
+              date: departureDate,
+            ),
             BlaDivider(),
-            PassagerCount(requestedSeat: 2),
+            PassagerCount(
+              requestedSeat: requestedSeats,
+            ),
             SizedBox(
               width: double.infinity,
               child: BlaButton(
                 label: 'Search',
                 buttonType: ButtonType.primary,
                 isFlat: true,
-                onTap: () {
-                  // Implement search logic
-                },
+                onTap: _onSearch,
               ),
             ),
           ],
