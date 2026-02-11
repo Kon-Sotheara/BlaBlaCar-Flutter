@@ -1,3 +1,4 @@
+import 'package:blabla/screens/ride/ride_screen.dart';
 import 'package:blabla/service/locations_service.dart';
 import 'package:blabla/utils/animations_util.dart';
 import 'package:flutter/material.dart';
@@ -113,33 +114,38 @@ class _RideFormState extends State<RideForm> {
     }
   }
 
-  void _onSearch() {
-    if (departure == null ||
-        arrival == null ||
-        requestedSeats <= 0 ||
-        departureDate.isBefore(
-          DateTime.now().subtract(const Duration(days: 1)),
-        )) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields correctly')),
-      );
-      return;
+  void _onSearch() async {
+    // If departure is empty, open departure picker
+    if (departure == null) {
+      await _selectDeparture();
+      return; // stop here until user selects
     }
 
-    // final ridePref = RidePref(
-    //   departure: departure!,
-    //   arrival: arrival!,
-    //   departureDate: departureDate,
-    //   requestedSeats: requestedSeats,
-    // );
+    // If arrival is empty, open arrival picker
+    if (arrival == null) {
+      await _selectArrival();
+      return; // stop here until user selects
+    }
 
-    // // Add both locations to history
-    // _addToHistory(departure!);
-    // _addToHistory(arrival!);
+    // All fields are valid, proceed to RideScreen
+    final ridePref = RidePref(
+      departure: departure!,
+      arrival: arrival!,
+      departureDate: departureDate,
+      requestedSeats: requestedSeats,
+    );
 
-    // // Return RidePref to parent
-    // Navigator.pop(context, ridePref);
+    // Add to history
+    _addToHistory(departure!);
+    _addToHistory(arrival!);
+
+    // Navigate to RideScreen (replace with your actual screen)
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => RideScreen(ridePref: ridePref,)),
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
